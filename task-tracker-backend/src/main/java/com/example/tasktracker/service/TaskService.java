@@ -2,6 +2,7 @@ package com.example.tasktracker.service;
 
 import com.example.tasktracker.dto.TaskRequest;
 import com.example.tasktracker.dto.TaskResponse;
+import com.example.tasktracker.dto.UserTaskReportDto;
 import com.example.tasktracker.entity.Task;
 import com.example.tasktracker.entity.User;
 import com.example.tasktracker.repository.TaskRepository;
@@ -84,5 +85,18 @@ public class TaskService {
                 .orElseThrow(() -> new IllegalArgumentException("Task not found or access denied"));
         
         taskRepository.delete(task);
+    }
+
+    public List<UserTaskReportDto> getUncompletedTasksReport() {
+    return userRepository.findAll().stream()
+            .map(user -> {
+                List<String> uncompletedTitles = user.getTasks().stream()
+                        .filter(task -> !task.isDone()) 
+                        .map(com.example.tasktracker.entity.Task::getTitle)
+                        .toList();
+                return new UserTaskReportDto(user.getEmail(), uncompletedTitles);
+            })
+            .filter(report -> !report.getUncompletedTaskTitles().isEmpty())
+            .toList();
     }
 }

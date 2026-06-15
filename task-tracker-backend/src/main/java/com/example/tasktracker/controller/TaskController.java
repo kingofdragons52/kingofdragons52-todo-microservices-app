@@ -46,4 +46,9 @@ public class TaskController {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body(Map.of("message", e.getMessage()));
         }
     }
+
+    @GetMapping("/internal/uncompleted-reports")
+    public ResponseEntity<List<com.example.tasktracker.dto.UserTaskReportDto>> getUncompletedReports() {
+        return ResponseEntity.ok(taskService.getUncompletedTasksReport());
+    }
 }

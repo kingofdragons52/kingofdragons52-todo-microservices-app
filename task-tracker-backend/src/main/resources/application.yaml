@@ -3,7 +3,7 @@ spring:
     name: task-tracker-backend
 
   datasource:
-    url: jdbc:postgresql://localhost:5432/task_tracker
+    url: jdbc:postgresql://localhost:5432/task_tracker_db
     username: tracker_user
     password: tracker_password
     driver-class-name: org.postgresql.Driver
