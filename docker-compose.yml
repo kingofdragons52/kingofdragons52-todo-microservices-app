@@ -38,6 +38,15 @@ services:
     networks:
       - tracker-network
 
+  mailhog: 
+    image: mailhog/mailhog:latest
+    container_name: task-tracker-mailhog
+    ports:
+      - "1025:1025" 
+      - "8025:8025"
+    networks:
+      - tracker-network
+
 volumes:
   pgdata:
 
