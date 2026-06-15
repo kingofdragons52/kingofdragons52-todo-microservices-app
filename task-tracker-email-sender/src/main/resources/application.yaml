@@ -1,0 +1,30 @@
+server:
+  port: 8081 
+
+spring:
+  application:
+    name: task-tracker-email-sender
+
+  kafka:
+    bootstrap-servers: localhost:9092
+    consumer:
+      group-id: email-sender-group 
+      auto-offset-reset: earliest
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+
+  mail:
+    host: in-v3.mailjet.com
+    port: 587
+    username: ${MAILJET_API_KEY}
+    password: ${MAILJET_SECRET_KEY}
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+
+app:
+  mail:
+    from: ${MAILJET_SENDER_EMAIL:noreply@tasktracker.com}
