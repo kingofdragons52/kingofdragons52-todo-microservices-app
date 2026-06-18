@@ -12,4 +12,4 @@ spring:
       value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
 
 app:
-  backend-url: "http://localhost:8080/tasks/internal/uncompleted-reports"
+  backend-url: "http://localhost:8080/tasks/internal/daily-reports"

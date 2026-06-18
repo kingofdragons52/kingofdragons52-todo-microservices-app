@@ -11,4 +11,5 @@ import lombok.Data;
 public class UserTaskReportDto {
     private String email;
     private List<String> uncompletedTaskTitles;
+    private List<String> completedTodayTaskTitles;
 }

@@ -47,8 +47,8 @@ public class TaskController {
         }
     }
 
-    @GetMapping("/internal/uncompleted-reports")
-    public ResponseEntity<List<com.example.tasktracker.dto.UserTaskReportDto>> getUncompletedReports() {
-        return ResponseEntity.ok(taskService.getUncompletedTasksReport());
+    @GetMapping("/internal/daily-reports")
+    public ResponseEntity<List<com.example.tasktracker.dto.UserTaskReportDto>> getDailyReports() {
+        return ResponseEntity.ok(taskService.getDailyTasksReport());
     }
 }

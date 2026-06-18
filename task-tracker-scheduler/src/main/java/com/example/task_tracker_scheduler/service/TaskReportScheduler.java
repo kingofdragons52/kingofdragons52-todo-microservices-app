@@ -26,9 +26,10 @@ public class TaskReportScheduler {
     @Value("${app.backend-url}")
     private String backendUrl;
 
+    //@Scheduled(cron = "0 0 0 * * ?")
     @Scheduled(fixedRate = 30000)
     public void sendDailyTaskReports() {
-        log.info("Планыровщик запущен: запрашиваем отчеты у бэкенда...");
+        log.info("Планировщик запущен: запрашиваем ежедневные отчеты у бэкенда...");
 
         try {
             ResponseEntity<List<UserTaskReportDto>> response = restTemplate.exchange(
@@ -41,20 +42,35 @@ public class TaskReportScheduler {
             List<UserTaskReportDto> reports = response.getBody();
 
             if (reports == null || reports.isEmpty()) {
-                log.info("Нет невыполненных задач. Отчеты отправлять никому не нужно.");
+                log.info("Бэкенд не вернул отчетов для обработки.");
                 return;
             }
 
             for (UserTaskReportDto report : reports) {
-                String emailBody = buildEmailBody(report.getUncompletedTaskTitles());
+                List<String> uncompleted = report.getUncompletedTaskTitles();
+                List<String> completed = report.getCompletedTaskTitles();
+
+                boolean hasUncompleted = uncompleted != null && !uncompleted.isEmpty();
+                boolean hasCompleted = completed != null && !completed.isEmpty();
+
+                if (!hasUncompleted && !hasCompleted) {
+                    continue;
+                }
+
+                String emailSubject = determineSubject(hasUncompleted, hasCompleted);
+                String emailBody = buildEmailBody(uncompleted, completed);
+
                 EmailMessage message = new EmailMessage(
                         report.getEmail(),
-                        "Внимание! Ваши невыполненные задачи",
+                        emailSubject,
                         emailBody
                 );
 
                 kafkaTemplate.send("EMAIL_SENDING_TASKS", message);
-                log.info("Отчет для {} успешно отправлен в Kafka", report.getEmail());
+                log.info("Отчет для {} успешно отправлен в Kafka. Статус: Выполнено за сутки [{}], Осталось [{}]", 
+                        report.getEmail(), 
+                        hasCompleted ? completed.size() : 0, 
+                        hasUncompleted ? uncompleted.size() : 0);
             }
 
         } catch (Exception e) {
@@ -62,13 +78,46 @@ public class TaskReportScheduler {
         }
     }
 
-    private String buildEmailBody(List<String> tasks) {
-        StringBuilder sb = new StringBuilder();
-        sb.append("Привет! Напоминаем, что у тебя остались невыполненные задачи:\n\n");
-        for (int i = 0; i < tasks.size(); i++) {
-            sb.append(i + 1).append(". ").append(tasks.get(i)).append("\n");
+    private String determineSubject(boolean hasUncompleted, boolean hasCompleted) {
+        if (hasUncompleted && hasCompleted) {
+            return "Ежедневный отчет: выполненные и оставшиеся задачи";
+        } else if (hasCompleted) {
+            return "Отличная работа! Ваши выполненные задачи за сегодня";
+        } else {
+            return "Внимание! У вас остались невыполненные задачи";
         }
-        sb.append("\nНе откладывай на потом!");
+    }
+
+    private String buildEmailBody(List<String> uncompleted, List<String> completed) {
+        StringBuilder sb = new StringBuilder();
+        sb.append("Привет! Вот твой отчет по задачам за прошедшие сутки:\n\n");
+
+        if (completed != null && !completed.isEmpty()) {
+            sb.append("✓ За сегодня вы выполнили задач: ").append(completed.size()).append("\n");
+            int limit = Math.min(completed.size(), 5);
+            for (int i = 0; i < limit; i++) {
+                sb.append("  - ").append(completed.get(i)).append("\n");
+            }
+            if (completed.size() > 5) {
+                sb.append("  - и еще ").append(completed.size() - 5).append(" шт.\n");
+            }
+            sb.append("\n");
+        }
+
+        if (uncompleted != null && !uncompleted.isEmpty()) {
+            sb.append("У вас осталось невыполненных задач: ").append(uncompleted.size()).append("\n");
+            int limit = Math.min(uncompleted.size(), 5);
+            for (int i = 0; i < limit; i++) {
+                sb.append("  - ").append(uncompleted.get(i)).append("\n");
+            }
+            if (uncompleted.size() > 5) {
+                sb.append("  - и еще ").append(uncompleted.size() - 5).append(" шт.\n");
+            }
+            sb.append("\nНе откладывай на потом!");
+        } else if (completed != null && !completed.isEmpty()) {
+            sb.append("Потрясающе! Все задачи на сегодня закрыты. Так держать! 🚀");
+        }
+
         return sb.toString();
     }
 }
