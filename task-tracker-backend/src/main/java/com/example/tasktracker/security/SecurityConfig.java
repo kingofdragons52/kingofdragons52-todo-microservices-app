@@ -38,8 +38,10 @@ public class SecurityConfig {
             }))
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/user", "/user/**", "/auth/**", "/error", "/tasks/internal/**").permitAll() 
-                .anyRequest().authenticated()                      
+                .requestMatchers(org.springframework.http.HttpMethod.POST, "/user").permitAll()
+                .requestMatchers("/auth/**", "/error", "/tasks/internal/**").permitAll() 
+    
+                .anyRequest().authenticated()                     
             );
 
         http.addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);

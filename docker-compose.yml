@@ -14,6 +14,11 @@ services:
       - pgdata:/var/lib/postgresql/data
     networks:
       - tracker-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U tracker_user -d task_tracker_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
 
   kafka:
     image: confluentinc/cp-kafka:7.6.0
@@ -37,6 +42,11 @@ services:
       CLUSTER_ID: 'MkU3OEVBNTcwNTJENDM2Qk'
     networks:
       - tracker-network
+    healthcheck:
+      test: ["CMD-SHELL", "kafka-broker-api-versions --bootstrap-server localhost:9092 || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
   mailhog: 
     image: mailhog/mailhog:latest
@@ -44,6 +54,32 @@ services:
     ports:
       - "1025:1025" 
       - "8025:8025"
+    networks:
+      - tracker-network
+
+  backend:
+    image: task-tracker-backend:latest
+    container_name: task-tracker-backend-app
+    ports:
+      - "8080:8080"
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/task_tracker_db
+      - SPRING_DATASOURCE_USERNAME=tracker_user
+      - SPRING_DATASOURCE_PASSWORD=tracker_password
+      
+      - SPRING_LIQUIBASE_URL=jdbc:postgresql://postgres:5432/task_tracker_db
+      - SPRING_LIQUIBASE_USER=tracker_user
+      - SPRING_LIQUIBASE_PASSWORD=tracker_password
+      
+      - SPRING_KAFKA_BOOTSTRAP_SERVERS=kafka:29092
+      
+      - SPRING_MAIL_HOST=mailhog
+      - SPRING_MAIL_PORT=1025
+    depends_on:
+      postgres:
+        condition: service_healthy
+      kafka:
+        condition: service_healthy
     networks:
       - tracker-network
 

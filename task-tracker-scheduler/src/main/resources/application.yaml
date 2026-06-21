@@ -1,10 +1,10 @@
 server:
-  port: 8082
+  port: 8082 
 
 spring:
   application:
     name: task-tracker-scheduler
-  
+
   kafka:
     bootstrap-servers: localhost:9092
     producer:
@@ -13,3 +13,4 @@ spring:
 
 app:
   backend-url: "http://localhost:8080/tasks/internal/daily-reports"
+  secret: "my-super-shared-secret-key-2026"
