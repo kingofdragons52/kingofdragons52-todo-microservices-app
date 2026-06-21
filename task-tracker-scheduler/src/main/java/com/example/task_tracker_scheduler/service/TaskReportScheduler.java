@@ -6,6 +6,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.kafka.core.KafkaTemplate;
@@ -32,10 +34,14 @@ public class TaskReportScheduler {
         log.info("Планировщик запущен: запрашиваем ежедневные отчеты у бэкенда...");
 
         try {
+            HttpHeaders headers = new HttpHeaders();
+            headers.set("X-Internal-Secret", "my-super-shared-secret-key-2026");
+            HttpEntity<Void> entity = new HttpEntity<>(headers);
+
             ResponseEntity<List<UserTaskReportDto>> response = restTemplate.exchange(
                     backendUrl,
                     HttpMethod.GET,
-                    null,
+                    entity,
                     new ParameterizedTypeReference<List<UserTaskReportDto>>() {}
             );
 
@@ -48,7 +54,7 @@ public class TaskReportScheduler {
 
             for (UserTaskReportDto report : reports) {
                 List<String> uncompleted = report.getUncompletedTaskTitles();
-                List<String> completed = report.getCompletedTaskTitles();
+                List<String> completed = report.getCompletedTodayTaskTitles();
 
                 boolean hasUncompleted = uncompleted != null && !uncompleted.isEmpty();
                 boolean hasCompleted = completed != null && !completed.isEmpty();
@@ -96,10 +102,10 @@ public class TaskReportScheduler {
             sb.append("✓ За сегодня вы выполнили задач: ").append(completed.size()).append("\n");
             int limit = Math.min(completed.size(), 5);
             for (int i = 0; i < limit; i++) {
-                sb.append("  - ").append(completed.get(i)).append("\n");
+                sb.append("   - ").append(completed.get(i)).append("\n");
             }
             if (completed.size() > 5) {
-                sb.append("  - и еще ").append(completed.size() - 5).append(" шт.\n");
+                sb.append("   - и еще ").append(completed.size() - 5).append(" шт.\n");
             }
             sb.append("\n");
         }
@@ -108,10 +114,10 @@ public class TaskReportScheduler {
             sb.append("У вас осталось невыполненных задач: ").append(uncompleted.size()).append("\n");
             int limit = Math.min(uncompleted.size(), 5);
             for (int i = 0; i < limit; i++) {
-                sb.append("  - ").append(uncompleted.get(i)).append("\n");
+                sb.append("   - ").append(uncompleted.get(i)).append("\n");
             }
             if (uncompleted.size() > 5) {
-                sb.append("  - и еще ").append(uncompleted.size() - 5).append(" шт.\n");
+                sb.append("   - и еще ").append(uncompleted.size() - 5).append(" шт.\n");
             }
             sb.append("\nНе откладывай на потом!");
         } else if (completed != null && !completed.isEmpty()) {

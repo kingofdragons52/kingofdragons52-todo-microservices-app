@@ -11,5 +11,5 @@ import java.util.List;
 public class UserTaskReportDto {
     private String email;
     private List<String> uncompletedTaskTitles;
-    private List<String> completedTaskTitles;
+    private List<String> completedTodayTaskTitles;
 }

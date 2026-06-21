@@ -48,7 +48,10 @@ public class TaskController {
     }
 
     @GetMapping("/internal/daily-reports")
-    public ResponseEntity<List<com.example.tasktracker.dto.UserTaskReportDto>> getDailyReports() {
-        return ResponseEntity.ok(taskService.getDailyTasksReport());
+    public ResponseEntity<?> getDailyReports(@RequestHeader(value = "X-Internal-Secret", required = false) String secret) {
+    if (!"my-super-shared-secret-key-2026".equals(secret)) {
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(Map.of("message", "Access denied"));
     }
+    return ResponseEntity.ok(taskService.getDailyTasksReport());
+}
 }

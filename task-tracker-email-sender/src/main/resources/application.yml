@@ -1,0 +1,25 @@
+server:
+  port: 8083 
+
+spring:
+  application:
+    name: task-tracker-email-sender
+
+  mail:
+    host: localhost
+    port: 1025
+    properties:
+      mail:
+        smtp:
+          auth: false
+          starttls:
+            enable: false
+
+  kafka:
+    bootstrap-servers: localhost:9092
+    consumer:
+      group-id: email-sender-group
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+      properties:
+        spring.json.trusted.packages: "*"
