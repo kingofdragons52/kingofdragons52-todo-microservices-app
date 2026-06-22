@@ -91,7 +91,7 @@ $(document).ready(function() {
             url: API_BASE_URL + '/tasks',
             type: 'POST',
             contentType: 'application/json',
-            data: JSON.stringify({ title: title, description: '', done: false }),
+            data: JSON.stringify({ title: title, description: '', isDone: false }),
             success: function() {
                 $('#new-task-title').val('');
                 loadTasks();
@@ -103,7 +103,7 @@ $(document).ready(function() {
         const taskId = $(this).data('id');
         const title = $(this).find('.card-title').text();
         const desc = $(this).data('description') || '';
-        const isDone = $(this).data('done');
+        const isDone = $(this).data('isDone');
 
         $('#edit-task-id').val(taskId);
         $('#edit-task-title').val(title);
@@ -120,7 +120,7 @@ $(document).ready(function() {
         const data = {
             title: $('#edit-task-title').val(),
             description: $('#edit-task-desc').val(),
-            done: $('#edit-task-status').is(':checked')
+            isDone: $('#edit-task-status').is(':checked')
         };
 
         $('#auto-save-status').text('Сохранение...').addClass('text-warning');
@@ -207,14 +207,14 @@ function loadTasks() {
 
             tasks.forEach(task => {
                 const cardHtml = `
-                    <div class="card mb-2 task-card" data-id="${task.id}" data-description="${task.description || ''}" data-done="${task.done}">
+                    <div class="card mb-2 task-card" data-id="${task.id}" data-description="${task.description || ''}" data-isDone="${task.isDone}">
                         <div class="card-body p-3">
-                            <h5 class="card-title m-0 ${task.done ? 'done-task' : ''}">${task.title}</h5>
+                            <h5 class="card-title m-0 ${task.isDone ? 'done-task' : ''}">${task.title}</h5>
                         </div>
                     </div>
                 `;
 
-                if (task.done) {
+                if (task.isDone) {
                     $('#done-tasks-list').append(cardHtml);
                 } else {
                     $('#todo-tasks-list').append(cardHtml);

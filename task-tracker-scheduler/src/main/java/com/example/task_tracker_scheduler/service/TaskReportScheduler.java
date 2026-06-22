@@ -28,8 +28,8 @@ public class TaskReportScheduler {
     @Value("${app.backend-url}")
     private String backendUrl;
 
-    //@Scheduled(cron = "0 0 0 * * ?")
-    @Scheduled(fixedRate = 30000)
+    @Scheduled(cron = "0 0 0 * * ?")
+    //@Scheduled(fixedRate = 30000)
     public void sendDailyTaskReports() {
         log.info("Планировщик запущен: запрашиваем ежедневные отчеты у бэкенда...");
 
