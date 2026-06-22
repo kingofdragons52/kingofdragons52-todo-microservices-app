@@ -6,11 +6,11 @@ spring:
     name: task-tracker-scheduler
 
   kafka:
-    bootstrap-servers: localhost:9092
+    bootstrap-servers: kafka:29092
     producer:
       key-serializer: org.apache.kafka.common.serialization.StringSerializer
       value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
 
 app:
-  backend-url: "http://localhost:8080/tasks/internal/daily-reports"
+  backend-url: "http://backend:8080/tasks/internal/daily-reports"
   secret: "my-super-shared-secret-key-2026"

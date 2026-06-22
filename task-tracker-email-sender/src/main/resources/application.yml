@@ -6,7 +6,7 @@ spring:
     name: task-tracker-email-sender
 
   mail:
-    host: localhost
+    host: mailhog
     port: 1025
     properties:
       mail:
@@ -16,7 +16,7 @@ spring:
             enable: false
 
   kafka:
-    bootstrap-servers: localhost:9092
+    bootstrap-servers: kafka:29092
     consumer:
       group-id: email-sender-group
       key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
